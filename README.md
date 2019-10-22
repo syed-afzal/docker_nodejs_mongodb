@@ -8,7 +8,7 @@ It's sound good  :ok_hand: , so let's start :runner:
 
 ## Prerequisite
 
-For this demo to work, [Docker](http://docker.com) needs to be installed on your local(host) machine.
+For this demo to work, [Docker](http://docker.com) and [git](https://git-scm.com/) needs to be installed on your local(host) machine.
 
 ## GuideLine Steps
 
@@ -39,9 +39,7 @@ CMD npm run dev
 
 ##### 2.1 Explanation of `DockerFile`
 
-- The first line tells Docker to use another Docker (Node) image.
-
-- We’re using is the official Docker image for Node.js and it’s version 10 image.
+- The first line tells Docker to use another Node image from the [DockerHub](https://hub.docker.com/). We’re using the official Docker image for Node.js and it’s version 10 image.
 
 - The second line, sets a working directory from where the app code will live inside the Docker container.
 
@@ -53,7 +51,7 @@ CMD npm run dev
 
  -On line 6, we tell docker to execute our app inside the container by using node to run `npm run dev. It is the command which I registered in __package.json__ in script section.
 
-###### `Note: For development purpose I used __nodemon__ , If you need to deploy at production you should change CMD from __npm run dev__ to __npm start__.`
+###### :clipboard: `Note: For development purpose I used __nodemon__ , If you need to deploy at production you should change CMD from __npm run dev__ to __npm start__.`
 
 Now lets understand the `docker-compose` file
 
@@ -86,13 +84,13 @@ services:
 
 __Version__
 
-The first line defines version of a file. It sounds confusing :confused:. What is meant by version of file ?? 
+The first line defines the version of a file. It sounds confusing :confused:. What is meant by version of file ?? 
 
 :pill: The Compose file is a YAML file defining services, networks, and volumes for a Docker application. So it is only a version of describing compose.yaml file. There are several versions of the Compose file format – 1, 2, 2.x, and 3.x.
 
 __Services__
 
-Our main work to create a container starts from here. As you see there are two services(Docker images), one is __Node__ and other is __MongoDB__.
+Our main goal to create a container, it starts from here. As you can see there are two services(Docker images), one is __Node__ and other is __MongoDB__.
 
 We define two services app and mongo:
 
@@ -102,7 +100,7 @@ We make image of app from our `DockeFile`, explanation below.
 
 __Explanation of service app__
 
-- Defining a service called __app__.
+- Defining a **nodesjs** service as __app__.
 - We named our **node server** container service as **app**. Assigning a name to the containers makes it easier to read when there are lot of containers on a machine, it can aslo avoid randomly generated container names. (Although in this case, __container_name__ is also __app__, this is merely personal preference, the name of the service and container do not have to be the same.) 
 - Docker container starts automatically if its fails.
 - Building the __app__ image using the Dockerfile from the current directory.
@@ -110,10 +108,13 @@ __Explanation of service app__
 
 ##### 3.1.2 Service mongo
 
-We add another service called **mongo** but this time instead of building it from `DockerFile` we write all the instruction here directly. We simply pull down the standard __mongo image__ from the Docker Hub registry as we have done it for Node image.
+We add another service called **mongo** but this time instead of building it from `DockerFile` we write all the instruction here directly. We simply pull down the standard __mongo image__ from the [DockerHub](https://hub.docker.com/) registry as we have done it for Node image.
 
 __Explanation of service mongo__
 
+- Defining a **mongodb** service as __mongo__.
+- Pulling the mongo 4.2.0 image image again from [DockerHub](https://hub.docker.com/).
+- Mount our current db directory to container. 
 - For persistent storage, we mount the host directory ( just like I did it in **Node** image inside `DockerFile` to reflect the changes) `/data` ( you need to create a directory in root of your project in order to save changes to locally as well) to the container directory `/data/db`, which was identified as a potential mount point in the `mongo Dockerfile` we saw earlier.
 - Mounting volumes gives us persistent storage so when starting a new container, Docker Compose will use the volume of any previous containers and copy it to the new container, ensuring that no data is lost.
 - Finally, we link/depends_on the app container to the mongo container so that the mongo service is reachable from the app service.
@@ -125,13 +126,13 @@ __Explanation of service mongo__
 
 #### 4. Commands to Build and Run the Docker image/containes
 
-We can now navigate to the project directory, open up a terminal window and run 
+We can now navigate to the project directory, open up a terminal window and run :
 
 ```bash
 $ sudo docker-compose up
 ```
 
-It will start make the image and start the two container one is __Node__ and other is __mongo__. If image makes correctly you will see the output like:
+It will start make the image and start the two container one is __Node__ and other is __mongo__. If image makes correctly you will see the output like :
 
 ```
 app      | > docker_node_mongo_starter@1.0.0 dev /usr/src/app
@@ -151,7 +152,7 @@ app      | 2019-10-17 11:22:06 INFO  MongoDB connected on mongodb://mongo:27017/
 
 Now to check an api of todos you hit the api using __curl__. Curl is need to be installed on your machine. Otherwise you should use postman for hitting an api.
 
-To Install curl run the command:
+To Install curl run the command :
 
 ```bash
 $  sudo apt-get update
