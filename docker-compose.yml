@@ -1,5 +1,11 @@
 version: "2"
 services:
+  frontend:
+    build: frontend
+    ports:
+      - "5000:5000"
+    container_name: front-container
+    restart: always
   app:
     container_name: app
     restart: always
