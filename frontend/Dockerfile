@@ -1,8 +1,14 @@
 # Create image based on the official Node image from dockerhub
 FROM node:10
 
+#Argument that is passed from docer-compose.yaml file
+ARG FRONT_END_PORT
+
 # Create app directory
 WORKDIR /usr/src/app
+
+#Echo the argument to check passed argument loaded here correctly
+RUN echo "Argument port is : $FRONT_END_PORT"
 
 # Copy dependency definitions
 COPY package.json /usr/src/app
@@ -14,7 +20,7 @@ RUN npm install
 COPY . /usr/src/app
 
 # Expose the port the app runs in
-EXPOSE 5000
+EXPOSE ${FRONT_END_PORT}
 
 # Serve the app
 CMD ["npm", "start"]
