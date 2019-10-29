@@ -1,5 +1,11 @@
 FROM node:10
 
+#Argument that is passed from docer-compose.yaml file
+ARG NODE_PORT
+
+#Echo the argument to check passed argument loaded here correctly
+RUN echo "Argument port is : $NODE_PORT"
+
 # Create app directory
 WORKDIR /usr/src/app
 
@@ -15,7 +21,7 @@ RUN npm install
 
 #In my case my app binds to port 3000 so you'll use the EXPOSE instruction to have it mapped by the docker daemon:
 
-EXPOSE 3000
+EXPOSE ${NODE_PORT}
 
 CMD npm run dev
 

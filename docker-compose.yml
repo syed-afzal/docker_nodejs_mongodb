@@ -1,19 +1,29 @@
 version: "2"
 services:
+  frontend:
+    build:
+      context: frontend
+      args:
+        FRONT_END_PORT: ${FRONT_END_PORT}
+    ports:
+      - ${FRONT_END_PORT}:${FRONT_END_PORT}
+    container_name: front-container
+    restart: always
   app:
     container_name: app
     restart: always
     build: .
     ports:
-      - "3000:3000"
+      - ${NODE_PORT}:${NODE_PORT}
     volumes:
       - .:/usr/src/app
     depends_on:
       - mongo
   mongo:
     container_name: mongo
+    restart: always
     image: mongo:4.2.0
     volumes:
       - ./data:/data/db
     ports:
-      - "27017:27017"
+      - ${MONGODB_PORT}:${MONGODB_PORT}
