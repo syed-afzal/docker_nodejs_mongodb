@@ -9,7 +9,6 @@ RUN echo "Argument port is : $NODE_PORT"
 # Create app directory
 WORKDIR /usr/src/app
 
-# Bundle app source
 #COPY . .
 COPY . .
 
@@ -19,7 +18,7 @@ COPY . .
 RUN npm install
 
 
-#In my case my app binds to port 3000 so you'll use the EXPOSE instruction to have it mapped by the docker daemon:
+#In my case my app binds to port NODE_PORT so you'll use the EXPOSE instruction to have it mapped by the docker daemon:
 
 EXPOSE ${NODE_PORT}
 

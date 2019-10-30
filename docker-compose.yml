@@ -7,12 +7,17 @@ services:
         FRONT_END_PORT: ${FRONT_END_PORT}
     ports:
       - ${FRONT_END_PORT}:${FRONT_END_PORT}
+    volumes:
+      - ./frontend:/usr/src/app
     container_name: front-container
     restart: always
   app:
     container_name: app
     restart: always
-    build: .
+    build:
+      context: .
+      args:
+        NODE_PORT: ${NODE_PORT}
     ports:
       - ${NODE_PORT}:${NODE_PORT}
     volumes:
