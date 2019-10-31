@@ -1,9 +1,11 @@
-# Docker starter with Node JS and MongoDB services
+# Docker starter with Node JS, React and MongoDB. All in a single repo
 
 ## Overview
 
-This repository shows how to get a Node.js app running with  MongoDB inside a Docker container on a local machine/computer. You can also see your code changes on a local machine to the running container of your docker image. In addition to this, not only your code changes reflect to your container, your every **CRUD** operation to **DB** will also saved inside your local machine **DB**.
-
+In this repo we define three **Docker**  container(services) **frontend**,  **backend** and **DB**. Our **backend** is on 
+**NodeJS**, frontend is on **ReactJS** and we used **MongoDB** as our **DB**. These all containers will run on your local machine/computer. 
+You can see your code changes on a local machine to the running containers of your docker images. In addition to this, not only your code changes reflect to your container, your every **CRUD** operation to **DB** will also saved inside your local machine.
+ 
 It's sound good  :ok_hand: , so let's start :runner:
 
 ## Prerequisite
@@ -13,77 +15,141 @@ For this demo to work, [Docker](http://docker.com) and [git](https://git-scm.com
 ## GuideLine Steps
 
 #### 1. Clone the repo
-First we will get through the `Dockerfile` then `docker-compose file`.
+We used two DockerFiles one for frontend and other for backend. 
+First we will get through the `Dockerfile` of frontend and backend then `docker-compose file`.
 
-#### 2. Snippet of `DockerFile`
+#### 2. Snippet of backend(Node.js)`DockerFile`
+
+You will find this `DockerFile` file in the root directory of the project.
 
 ```bash
 FROM node:10
 
+#Argument that is passed from docer-compose.yaml file
+ARG NODE_PORT
+
+#Echo the argument to check passed argument loaded here correctly
+RUN echo "Argument port is : $NODE_PORT"
+
 # Create app directory
 WORKDIR /usr/src/app
 
-# Bundle app source into the container
+#COPY . .
 COPY . .
 
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 # where available (npm@5+)
-
 RUN npm install
 
 
-#In my case my app binds to port 3000 so you'll use the EXPOSE instruction to have it mapped by the docker daemon:
+#In my case my app binds to port NODE_PORT so you'll use the EXPOSE instruction to have it mapped by the docker daemon:
 
-EXPOSE 3000
+EXPOSE ${NODE_PORT}
 
 CMD npm run dev
 ```
 
-##### 2.1 Explanation of `DockerFile`
+##### 2.1 Explanation of backend(Node.js) `DockerFile`
 
 - The first line tells Docker to use another Node image from the [DockerHub](https://hub.docker.com/). We’re using the official Docker image for Node.js and it’s version 10 image.
 
-- The second line, sets a working directory from where the app code will live inside the Docker container.
+- On second line we declare argument `NODE_PORT` which we will pass it from `docker-compose`.
 
-- We are copying/bundling our code working directory into container working directory on line three.
+- On third line we log to check argument is successfully read 
 
-- We run npm install for dependencies in container on line four.
+- On fourth line we sets a working directory from where the app code will live inside the Docker container.
 
-- On Line 5, we setup the port that Docker will expose when the container is running. Port 3000 in our case.
+- On fifth line, we are copying/bundling our code working directory into container working directory on line three.
 
-- On line 6, we tell docker to execute our app inside the container by using node to run `npm run dev. It is the command which I registered in __package.json__ in script section.
+- On line seven, we run npm install for dependencies in container on line four.
+
+- On Line eight, we setup the port, that Docker will expose when the container is running. In our case it is the port which we define inside `.env` file, read it from `docker-compose` then passed as a argument to the (backend)`DockerFile`.
+
+- And in last, we tell docker to execute our app inside the container by using node to run `npm run dev. It is the command which I registered in __package.json__ in script section.
 
 ###### :clipboard: `Note: For development purpose I used __nodemon__ , If you need to deploy at production you should change CMD from __npm run dev__ to __npm start__.`
 
+#### 3. Snippet of frontend(ReactJS)`DockerFile`
+
+You will find this `DockerFile` inside **frontend** directory. 
+
+```bash
+# Create image based on the official Node image from dockerhub
+FROM node:10
+
+#Argument that is passed from docer-compose.yaml file
+ARG FRONT_END_PORT
+
+# Create app directory
+WORKDIR /usr/src/app
+
+#Echo the argument to check passed argument loaded here correctly
+RUN echo "Argument port is : $FRONT_END_PORT"
+
+# Copy dependency definitions
+COPY package.json /usr/src/app
+
+# Install dependecies
+RUN npm install
+
+# Get all the code needed to run the app
+COPY . /usr/src/app
+
+# Expose the port the app runs in
+EXPOSE ${FRONT_END_PORT}
+
+# Serve the app
+CMD ["npm", "start"]
+```
+##### 3.1 Explanation of frontend(ReactJS) `DockerFile`
+
+Frontend `DockerFile` is almost the same as Backend `DockerFile`. The 
+only difference is argument name.
+
 Now lets understand the `docker-compose` file
 
-#### 3. Snippet of `docker-compose`
+#### 4. Snippet of `docker-compose`
 
 ```bash
 version: "2"
 services:
+  frontend:
+    build:
+      context: frontend
+      args:
+        FRONT_END_PORT: ${FRONT_END_PORT}
+    ports:
+      - ${FRONT_END_PORT}:${FRONT_END_PORT}
+    volumes:
+      - ./frontend:/usr/src/app
+    container_name: front-container
+    restart: always
   app:
     container_name: app
     restart: always
-    build: .
+    build:
+      context: .
+      args:
+        NODE_PORT: ${NODE_PORT}
     ports:
-      - "3000:3000"
+      - ${NODE_PORT}:${NODE_PORT}
     volumes:
       - .:/usr/src/app
     depends_on:
       - mongo
   mongo:
     container_name: mongo
+    restart: always
     image: mongo:4.2.0
     volumes:
       - ./data:/data/db
     ports:
-      - "27017:27017"
+      - ${MONGODB_PORT}:${MONGODB_PORT}
 ```
 
 
-##### 3.1 Explanation of `docker-compose`
+##### 4.1 Explanation of `docker-compose`
 
 __Version__
 
@@ -93,23 +159,26 @@ The first line defines the version of a file. It sounds confusing :confused:. Wh
 
 __Services__
 
-Our main goal to create a container, it starts from here. As you can see there are two services(Docker images), one is __Node__ and other is __MongoDB__.
+Our main goal to create a containers, it starts from here. As you can see there are three services(Docker images): 
+- First is __frontend__ 
+- Second is __app__ which is __backend - NodeJS__. I used a name app here, it's totally on you to name it __backend__.
+- Third is __MongoDB__.
 
-We define two services app and mongo:
-
-##### 3.1.1 Service app
+##### 4.1.1 Service app (backend - NodeJS)
 
 We make image of app from our `DockeFile`, explanation below.
 
 __Explanation of service app__
 
-- Defining a **nodesjs** service as __app__.
+- Defining a **nodejs** service as __app__.
 - We named our **node server** container service as **app**. Assigning a name to the containers makes it easier to read when there are lot of containers on a machine, it can aslo avoid randomly generated container names. (Although in this case, __container_name__ is also __app__, this is merely personal preference, the name of the service and container do not have to be the same.) 
 - Docker container starts automatically if its fails.
-- Building the __app__ image using the Dockerfile from the current directory.
+- Building the __app__ image using the Dockerfile from the current directory and passing an argument to the
+backend `DockerFile`.
 - Mapping the host port to the container port.
+- Why we used `${}` ?. It is the way to read `environment` variables from `.env` file inside `docker-compose`. But it should be in the same directory of `docker-compose`.   
 
-##### 3.1.2 Service mongo
+##### 4.1.2 Service mongo
 
 We add another service called **mongo** but this time instead of building it from `DockerFile` we write all the instruction here directly. We simply pull down the standard __mongo image__ from the [DockerHub](https://hub.docker.com/) registry as we have done it for Node image.
 
@@ -127,7 +196,7 @@ __Explanation of service mongo__
 
 :white_check_mark: You should check your __mongo__ version is same as used in image. You can see the version of __mongo__ image in `docker-compose `file, I used __image: mongo:4.2.0__. If your mongo db version on your machine is not same then furst you have to updated your  local __mongo__ version in order to works correctly.
 
-#### 4. Commands to Build and Run the Docker image/containes
+#### 5. Command to Build and Run the Docker images/containers
 
 We can now navigate to the project directory, open up a terminal window and run :
 
@@ -152,6 +221,8 @@ mongo    | 2019-10-17T11:22:06.621+0000 I  NETWORK  [listener] connection accept
 mongo    | 2019-10-17T11:22:06.630+0000 I  NETWORK  [conn1] received client metadata from 172.18.0.3:57620 conn1: { driver: { name: "nodejs", version: "3.1.1" }, os: { type: "Linux", name: "linux", architecture: "x64", version: "4.15.0-65-generic" }, platform: "Node.js v10.16.3, LE, mongodb-core: 3.1.0" }
 app      | 2019-10-17 11:22:06 INFO  MongoDB connected on mongodb://mongo:27017/TodoApp
 ```
+
+#### 6. Verification of Server is running and DB is connected
 
 Now to check an api of todos you hit the api using __curl__. Curl is need to be installed on your machine. Otherwise you should use postman for hitting an api.
 
@@ -189,8 +260,26 @@ I added the text for todo is "testing todo" you can write any text you want. You
 
 `{"code":200,"success":true,"message":"Successfully completed","todos":[{"_id":"5da71f426e17e00020a67539","text":"Testing todo","__v":0}]}`
 
+#### 7. Verification of FrontEnd
+
+Open your favourite browser and go to 
+
+###### :clipboard: `Note: It is the port which I defined in `.env` file you can change this port it's totally on you.`
+
+```
+http://localhost:5000/
+```
+
+
+You will see something like this
+
+![image](front.png)
+
+Now Play with the app :sunglasses:	
+
 That's all Folks :tada:
 
 #### Conclusion
 
-We have a build a simple application that persists data in MongoDB. We were able to Dockerize that application and use docker-compose to lunch both the application and MongoDB in a single command. Lastly, we used volumes to ensure the persisted data remains after the MongoDB container is destroyed.
+We have a build a simple application that persists data in MongoDB. We were able to Dockerize that application and use 
+to lunch both the application and MongoDB in a single command. Lastly, we used volumes to ensure the persisted data remains after the MongoDB container is destroyed.
