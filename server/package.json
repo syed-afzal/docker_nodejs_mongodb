@@ -4,8 +4,8 @@
   "description": "docker starter with node js and mongodb services",
   "main": "index.js",
   "scripts": {
-    "start": "node server/server.js",
-    "dev": "nodemon server/server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "author": "Syed Afzal",
   "license": "ISC",
