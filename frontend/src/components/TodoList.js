@@ -1,49 +1,48 @@
-import React from "react";
+import React from 'react';
 
 export default class TodoList extends React.Component {
-  constructor(props) {
-    super(props);
 
-    this.state = {
-      activeIndex: 0,
-    };
-  }
+    constructor(props){
+        super(props);
 
-  handleActive(index) {
-    this.setState({
-      activeIndex: index,
-    });
-  }
+        this.state = {
+            activeIndex:0,
+        }
+    }
 
-  renderTodos(todos) {
-    return (
-      <ul className="list-group">
-        {todos.map((todo, i) => (
-          <li
-            className={
-              "list-group-item cursor-pointer " +
-              (i === this.state.activeIndex ? "active" : "")
-            }
-            key={i}
-            onClick={() => {
-              this.handleActive(i);
-            }}
-          >
-            {todo.text}
-          </li>
-        ))}
-      </ul>
-    );
-  }
+    _handleActive(index) {
+        this.setState({
+            activeIndex: index
+        })
+    }
 
-  render() {
-    let { todos } = this.props;
-    return todos.length > 0 ? (
-      this.renderTodos(todos)
-    ) : (
-      <div className="alert alert-primary" role="alert">
-        No Todos to display
-      </div>
-    );
-  }
+    _renderTodos(todos) {
+        return (
+            <ul className="list-group">
+                {
+                    todos.map((todo, i) => {
+                        return (<li className={'list-group-item cursor-pointer ' + (i===this.state.activeIndex ? 'active' : '')}
+                                    key={i}
+                                    onClick={() => {this._handleActive(i)}}
+                        >
+                            {todo.text}
+                        </li>)
+                    })
+                }
+            </ul>
+        )
+    }
+
+
+    render() {
+        let { todos } = this.props;
+        return (
+            todos.length > 0 ?
+                this._renderTodos(todos)
+                :
+                <div className="alert alert-primary" role="alert">
+                    No Todos to display
+                </div>
+        )
+    }
 }

@@ -13,17 +13,17 @@ services:
       - /usr/src/app/node_modules
     container_name: frontend
     restart: always
-  backend:
-    container_name: backend
+  server:
+    container_name: server
     restart: always
     build:
-      context: backend
+      context: server
       args:
         NODE_PORT: ${NODE_PORT}
     ports:
       - ${NODE_PORT}:${NODE_PORT}
     volumes:
-      - ./backend:/usr/src/app
+      - ./server:/usr/src/app
       - /usr/src/app/node_modules
     depends_on:
       - mongo
