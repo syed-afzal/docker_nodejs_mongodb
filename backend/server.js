@@ -25,9 +25,9 @@ app.use(express.static(path.join(__dirname, "public")));
 require("./routes")(app);
 
 app.on("ready", () => {
-    app.listen(3000, () => {
-        console.log("Server is up on port", 3000);
-    });
+  app.listen(3000, () => {
+    console.log("Server is up on port", 3000);
+  });
 });
 
 module.exports = app;

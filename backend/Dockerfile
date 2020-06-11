@@ -24,5 +24,3 @@ COPY . /usr/src/app
 EXPOSE ${NODE_PORT}
 
 CMD npm run dev
-
-

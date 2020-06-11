@@ -1,14 +1,14 @@
 # Create image based on the official Node image from dockerhub
-FROM node:13.13.0-stretch
+FROM node:lts-buster-slim
 
 #Argument that is passed from docer-compose.yaml file
 ARG FRONT_END_PORT
 
-# Create app directory
-WORKDIR /usr/src/app
-
 #Echo the argument to check passed argument loaded here correctly
 RUN echo "Argument port is : $FRONT_END_PORT"
+
+# Create app directory
+WORKDIR /usr/src/app
 
 # Copy dependency definitions
 COPY package.json /usr/src/app
